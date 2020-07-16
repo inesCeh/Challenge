@@ -1,0 +1,224 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ChallengeApi.Models;
+
+using System.Timers;
+using System.Net.Http;
+using Hazelcast.Client;
+using Newtonsoft.Json.Linq;
+using Hazelcast.Core;
+using System.Collections;
+
+namespace ChallengeApi.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class MetricItemsController : ControllerBase
+
+    {
+        private readonly MetricContext _context;
+
+        public MetricItemsController(MetricContext context)
+        {
+            _context = context;
+        }
+
+        /*
+        // GET: api/MetricItems
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<MetricItem>>> GetMetricItems()
+        {  
+            ClearContext();
+    
+            var client = HazelcastClient.NewHazelcastClient();
+            IMap<string, double> mapMetricsAggregatedData = client.GetMap<string,double>("metrics-aggregated-data");
+            ICollection<string> keys = mapMetricsAggregatedData.KeySet();
+            MetricItem metricItem;
+            foreach (var key in keys) {
+         
+                metricItem = new MetricItem();
+                metricItem.Id = key;
+                metricItem.Value = mapMetricsAggregatedData.Get(key);;
+
+                _context.MetricItems.Add(metricItem);
+                await _context.SaveChangesAsync();
+            }
+
+            return await _context.MetricItems.ToListAsync();
+        }
+        */
+
+        // GET: api/MetricItems/userName
+        [HttpGet("{userName}")]
+        public async Task<ActionResult<IEnumerable<MetricItem>>> GetMetricItems(string userName)
+        {            
+            ClearContext();
+    
+            var client = HazelcastClient.NewHazelcastClient();
+            IMap<string, double> mapMetricsAggregatedData = client.GetMap<string,double>("metrics-aggregated-data");
+            ICollection<string> keys = mapMetricsAggregatedData.KeySet();
+            MetricItem metricItem;
+            foreach (var key in keys) {
+                string[] keyParts = key.Split('*');
+                if(String.Equals(userName, keyParts[0]))
+                {
+                    metricItem = new MetricItem();
+                    metricItem.Id = key;
+                    metricItem.Value = mapMetricsAggregatedData.Get(key);;
+
+                    _context.MetricItems.Add(metricItem);
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            return await _context.MetricItems.ToListAsync();
+        }
+
+        // GET: api/MetricItems/userName
+        [HttpGet("{userName}/{shimKey}")]
+        public async Task<ActionResult<IEnumerable<MetricItem>>> GetMetricItems(string userName, string shimKey)
+        {            
+            ClearContext();
+    
+            var client = HazelcastClient.NewHazelcastClient();
+            IMap<string, double> mapMetricsAggregatedData = client.GetMap<string,double>("metrics-aggregated-data");
+            ICollection<string> keys = mapMetricsAggregatedData.KeySet();
+            MetricItem metricItem;
+            foreach (var key in keys) {
+                string[] keyParts = key.Split('*');
+                if(String.Equals(userName, keyParts[0]) && String.Equals(shimKey, keyParts[1]))
+                {
+                    metricItem = new MetricItem();
+                    metricItem.Id = key;
+                    metricItem.Value = mapMetricsAggregatedData.Get(key);;
+
+                    _context.MetricItems.Add(metricItem);
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            return await _context.MetricItems.ToListAsync();
+        }
+
+        // GET: api/MetricItems/userName/shimKey/endpoint
+        [HttpGet("{userName}/{shimKey}/{endpoint}")]
+        public async Task<ActionResult<MetricItem>> GetMetricItem(string userName, string shimKey, string endpoint)
+        {
+            var metricItem = new MetricItem();
+            await Task.Run(() => 
+            {
+                            
+            var client = HazelcastClient.NewHazelcastClient();
+            IMap<string, double> mapMetricsAggregatedData = client.GetMap<string,double>("metrics-aggregated-data");
+            ICollection<string> keys = mapMetricsAggregatedData.KeySet();
+            foreach (var key in keys) {
+                string[] keyParts = key.Split('*');
+                if(String.Equals(userName, keyParts[0]) && String.Equals(shimKey, keyParts[1]) && String.Equals(endpoint, keyParts[2]))
+                {
+                    metricItem = new MetricItem();
+                    metricItem.Id = key;
+                    metricItem.Value = mapMetricsAggregatedData.Get(key);
+                }
+            }
+
+            //return metricItem; 
+        });
+
+return metricItem; 
+        }
+
+        /*
+        // GET: api/MetricItems/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<MetricItem>> GetMetricItem(long id)
+        {
+            var metricItem = await _context.MetricItems.FindAsync(id);
+
+            if (metricItem == null)
+            {
+                return NotFound();
+            }
+
+            return metricItem;
+        }*/
+
+        // PUT: api/MetricItems/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for
+        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutMetricItem(string id, MetricItem metricItem)
+        {
+            if (id != metricItem.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(metricItem).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!MetricItemExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // POST: api/MetricItems
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for
+        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [HttpPost]
+        public async Task<ActionResult<MetricItem>> PostMetricItem(MetricItem metricItem)
+        {
+            _context.MetricItems.Add(metricItem);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetMetricItem", new { Id = metricItem.Id }, metricItem);
+        }
+
+        // DELETE: api/MetricItems/5
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<MetricItem>> DeleteMetricItem(long id)
+        {
+            var metricItem = await _context.MetricItems.FindAsync(id);
+            if (metricItem == null)
+            {
+                return NotFound();
+            }
+
+            _context.MetricItems.Remove(metricItem);
+            await _context.SaveChangesAsync();
+
+            return metricItem;
+        }
+
+        private bool MetricItemExists(string id)
+        {
+            return _context.MetricItems.Any(e => e.Id == id);
+        }
+        
+        private void ClearContext() {
+            
+            foreach(var metricItem in _context.MetricItems)
+            {
+                _context.MetricItems.Remove(metricItem);
+            }
+            _context.SaveChanges();
+        }
+    }
+}
