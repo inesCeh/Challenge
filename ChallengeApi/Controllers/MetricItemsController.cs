@@ -125,11 +125,35 @@ namespace ChallengeApi.Controllers
                     metricItem.Value = mapMetricsAggregatedData.Get(key);
                 }
             }
+            });
 
-            //return metricItem; 
-        });
+            return metricItem; 
+        }
 
-return metricItem; 
+        [Route("[action]/{userName}/{endpoint}")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<MetricItem>>> GetByUserNameAndEndpoint(string userName, string endpoint)
+        {            
+            ClearContext();
+    
+            var client = HazelcastClient.NewHazelcastClient();
+            IMap<string, double> mapMetricsAggregatedData = client.GetMap<string,double>("metrics-aggregated-data");
+            ICollection<string> keys = mapMetricsAggregatedData.KeySet();
+            MetricItem metricItem;
+            foreach (var key in keys) {
+                string[] keyParts = key.Split('*');
+                if(String.Equals(userName, keyParts[0]) && String.Equals(endpoint, keyParts[2]))
+                {
+                    metricItem = new MetricItem();
+                    metricItem.Id = key;
+                    metricItem.Value = mapMetricsAggregatedData.Get(key);;
+
+                    _context.MetricItems.Add(metricItem);
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            return await _context.MetricItems.ToListAsync();
         }
 
         /*

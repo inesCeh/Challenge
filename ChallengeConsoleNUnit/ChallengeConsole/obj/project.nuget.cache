@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "YReCAsPE2yq0z4iOSOdLwvBRdYRwB6Dmpq2H+QPJwglA2JAZ3ZkHoPKqQYdciEYYgGLpCHqIhGIJw+A55OHEIw==",
+  "success": true,
+  "projectFilePath": "D:\\Challenge\\Challenge\\ChallengeConsoleNUnit\\ChallengeConsole\\ChallengeConsole.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Ines\\.nuget\\packages\\hazelcast.net\\3.12.3\\hazelcast.net.3.12.3.nupkg.sha512",
+    "C:\\Users\\Ines\\.nuget\\packages\\newtonsoft.json\\12.0.2\\newtonsoft.json.12.0.2.nupkg.sha512",
+    "C:\\Users\\Ines\\.nuget\\packages\\system.data.sqlite.core\\1.0.113.1\\system.data.sqlite.core.1.0.113.1.nupkg.sha512"
+  ],
+  "logs": []
+}
