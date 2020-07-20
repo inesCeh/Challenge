@@ -40,13 +40,27 @@
       "frameworks": {
         "netcoreapp3.1": {
           "dependencies": {
+            "FakeHttpMessageHandler": {
+              "target": "Package",
+              "version": "[1.0.1, )"
+            },
             "Microsoft.NET.Test.Sdk": {
               "target": "Package",
               "version": "[16.4.0, )"
             },
+            "Moq": {
+              "target": "Package",
+              "version": "[4.14.5, )"
+            },
             "NUnit3TestAdapter": {
               "target": "Package",
               "version": "[3.15.1, )"
+            },
+            "coverlet.msbuild": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.9.0, )"
             },
             "nunit": {
               "target": "Package",

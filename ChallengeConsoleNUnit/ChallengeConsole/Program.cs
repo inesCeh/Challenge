@@ -7,25 +7,69 @@ using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using Hazelcast.Core;
 using System.Collections;
+using System.Diagnostics;
+using System.Net.Mail;
 
 namespace ChallengeConsole
 {
     public class Program
     {  
+        public static Dictionary<string, string> dictionary;
         private static System.Timers.Timer aTimer;
-        static IMap<string, double> mapMetricsAggregatedData;
-        static private ArrayList arlistCaloriesBurned;
-        static private ArrayList arlistBodyWeights;
-        static private ArrayList arlistSpeeds;
-        static private ArrayList arlistPhysicalActivity;
-        static private ArrayList arlistSteps;
-        static private ArrayList arlistBodyMassIndexes;
+        public static IMap<string, double> mapMetricsAggregatedData;
+        private static ArrayList arlistCaloriesBurned;
+        public static ArrayList arlistBodyWeights;
+        private static ArrayList arlistSpeeds;
+        private static ArrayList arlistPhysicalActivity;
+        private static ArrayList arlistSteps;
+        private static ArrayList arlistBodyMassIndexes;
         
+        public static bool IsValid(string emailaddress)
+        {
+            try
+            {
+                MailAddress m = new MailAddress(emailaddress);
+                return true;
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
+        }
+
         static async Task Main(string[] args)
         {
+            dictionary = new Dictionary<string, string>();
+            dictionary.Add("googlefit", "");
+            dictionary.Add("fitbit", "");
+
+            Dictionary<string, string> dictionaryCopy = new Dictionary<string, string>(dictionary);
+
+            foreach(KeyValuePair<string, string> item in dictionaryCopy) {
+                
+                string shimKey = item.Key;
+                Console.WriteLine(shimKey);
+                string userName = "";
+                do {
+                    Console.Write("Enter your username (email address) for " + shimKey + ": ");
+                    userName = Console.ReadLine();
+                    if (!string.IsNullOrEmpty(userName)) {
+                        if(IsValid(userName)){
+
+                            dictionary[shimKey] = userName;
+                        } else {
+                            Console.WriteLine("Email address is not valid, please try again.");
+                        }
+                    } else {
+                      Console.WriteLine("Empty input, please try again.");
+                    }
+                } while (string.IsNullOrEmpty(userName) || !IsValid(userName)); 
+            }
+
             SetupStoreage();
-            await InitiateAuthorization();
+            await InitiateAuthorization(); 
         }
+
         private static void SetTimer()
         {
             aTimer = new System.Timers.Timer(30000);
@@ -41,87 +85,100 @@ namespace ChallengeConsole
 
             DeleteStoreageContent(); 
 
+            string userNameGooglefit = dictionary["googlefit"];
             //Googlefit
-            await ReadData("googlefit", "body_height", "challengeines@gmail.com", "2020-07-12", "2020-07-13");
+            await ReadData("googlefit", userNameGooglefit, "body_height", "2020-07-12", "2020-07-13");
 
             arlistBodyWeights = new ArrayList();
-            await ReadData("googlefit", "body_weight", "challengeines@gmail.com", "2020-07-12", "2020-07-13");
-            BodyWeightAgregation("challengeines@gmail.com", "googlefit", "body_weight", arlistBodyWeights);
+            await ReadData("googlefit", userNameGooglefit, "body_weight", "2020-07-12", "2020-07-13");
+            BodyWeightAgregation(userNameGooglefit, "googlefit", "body_weight", arlistBodyWeights);
 
             arlistCaloriesBurned = new ArrayList();
-            await ReadData("googlefit", "calories_burned", "challengeines@gmail.com", "2020-07-12", "2020-07-13");
-            CaloriesBurnedAgregation("challengeines@gmail.com", "googlefit", "calories_burned", arlistCaloriesBurned);
+            await ReadData("googlefit", userNameGooglefit, "calories_burned", "2020-07-12", "2020-07-13");
+            CaloriesBurnedAgregation(userNameGooglefit, "googlefit", "calories_burned", arlistCaloriesBurned);
 
 
-            await ReadData("googlefit", "heart_rate", "challengeines@gmail.com", "2020-07-12", "2020-07-13");
+            await ReadData("googlefit", userNameGooglefit, "heart_rate", "2020-07-12", "2020-07-13");
 
             arlistPhysicalActivity = new ArrayList();
-            await ReadData("googlefit", "physical_activity", "challengeines@gmail.com", "2020-07-14", "2020-07-14");
-            PhysicalActivityAgregation("challengeines@gmail.com", "googlefit", "physical_activity", arlistPhysicalActivity);
+            await ReadData("googlefit", userNameGooglefit, "physical_activity", "2020-07-14", "2020-07-14");
+            PhysicalActivityAgregation(userNameGooglefit, "googlefit", "physical_activity", arlistPhysicalActivity);
 
             arlistSpeeds = new ArrayList();
-            await ReadData("googlefit", "speed", "challengeines@gmail.com", "2020-07-12", "2020-07-13");
-            SpeedAgregation("challengeines@gmail.com", "googlefit", "speed", arlistSpeeds);
+            await ReadData("googlefit", userNameGooglefit, "speed", "2020-07-12", "2020-07-13");
+            SpeedAgregation(userNameGooglefit, "googlefit", "speed", arlistSpeeds);
 
             arlistSteps = new ArrayList();
-            await ReadData("googlefit", "step_count", "challengeines@gmail.com", "2020-07-12", "2020-07-13");
-            StepCountAgregation("challengeines@gmail.com", "googlefit", "step_count", arlistSteps);
+            await ReadData("googlefit", userNameGooglefit, "step_count", "2020-07-12", "2020-07-13");
+            StepCountAgregation(userNameGooglefit, "googlefit", "step_count", arlistSteps);
 
+            string userNameFitbit = dictionary["fitbit"];
             //Fitbit
             arlistBodyMassIndexes = new ArrayList();
-            await ReadData("fitbit", "body_mass_index", "challengeines@gmail.com", "2020-07-12", "2020-07-13");
-            BodyMaxIndexAgregation("challengeines@gmail.com", "fitbit", "body_mass_index", arlistBodyMassIndexes);
+            await ReadData("fitbit", userNameFitbit, "body_mass_index", "2020-07-12", "2020-07-13");
+            BodyMaxIndexAgregation(userNameFitbit, "fitbit", "body_mass_index", arlistBodyMassIndexes);
 
             arlistBodyWeights = new ArrayList();
-            await ReadData("fitbit", "body_weight", "challengeines@gmail.com", "2020-07-12", "2020-07-13");
-            BodyWeightAgregation("challengeines@gmail.com", "fitbit", "body_weight", arlistBodyWeights);
+            await ReadData("fitbit", userNameFitbit, "body_weight", "2020-07-12", "2020-07-13");
+            BodyWeightAgregation(userNameFitbit, "fitbit", "body_weight", arlistBodyWeights);
 
             arlistPhysicalActivity = new ArrayList();
-            await ReadData("fitbit", "physical_activity", "challengeines@gmail.com", "2020-07-12", "2020-07-13");
-            PhysicalActivityAgregation("challengeines@gmail.com", "fitbit", "physical_activity", arlistPhysicalActivity);
+            await ReadData("fitbit", userNameFitbit, "physical_activity", "2020-07-12", "2020-07-13");
+            PhysicalActivityAgregation(userNameFitbit, "fitbit", "physical_activity", arlistPhysicalActivity);
 
             ReadFromStoreage();
         }
 
-        private static async Task InitiateAuthorization() {
+        public static async Task InitiateAuthorization() {
             
             Console.WriteLine("Initiate authorization...");
 
-            string baseURL = $"http://localhost:8083/authorize/googlefit?username=challengeines@gmail.com";
-            //string baseURL = $"http://localhost:8083/authorize/fitbit?username=challengeines@gmail.com";
-            try { 
-                using (HttpClient client = new HttpClient())
-                {
-                    using (HttpResponseMessage res = await client.GetAsync(baseURL))
+            foreach(KeyValuePair<string, string> item in dictionary) {
+                string shimKey = item.Key;
+                string userName = item.Value;
+                string baseURL = $"http://localhost:8083/authorize/{shimKey}?username={userName}";
+                try { 
+                    using (HttpClient client = new HttpClient())
                     {
-                        using (HttpContent content = res.Content)
+                        using (HttpResponseMessage res = await client.GetAsync(baseURL))
                         {
-                            string data = await content.ReadAsStringAsync();
-
-                            if (data != null)
+                            using (HttpContent content = res.Content)
                             {
-                                var dataObj = JObject.Parse(data);
+                                string data = await content.ReadAsStringAsync();
 
-                                String autorizationUrl = $"{dataObj["authorizationUrl"]}";
-                                Console.WriteLine("authorizationUrl : {0}" ,autorizationUrl);
-                                
-                                //TO DO: Display autoratization screen
-                                //Process.Start(@"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", autorizationUrl);
-                            
-                            }
-                            else
-                            {
-                                Console.WriteLine("Data is null!");
+                                if (data != null)
+                                {
+                                    var dataObj = JObject.Parse(data);
+                                    Console.WriteLine("Data:");
+                                    Console.WriteLine(dataObj);
+
+                                    String isAuthorized = $"{dataObj["isAuthorized"]}";
+                                    Console.WriteLine("{0} isAuthorized : {1}" , shimKey, isAuthorized);
+                                    if(!string.IsNullOrEmpty(isAuthorized)) {
+                                        if(isAuthorized.Equals("False")) {
+                                            String autorizationUrl = $"{dataObj["authorizationUrl"]}";
+                                            Console.WriteLine("authorizationUrl : {0}" ,autorizationUrl);
+
+                                            if(!string.IsNullOrEmpty(autorizationUrl)) {
+                                                Process.Start(@"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", autorizationUrl);
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Data is null!");
+                                }
                             }
                         }
                     }
+                } catch(Exception exception) {
+                    Console.WriteLine(exception);
                 }
-            } catch(Exception exception) {
-                Console.WriteLine(exception);
             }
 
             SetTimer();
-
+        
             Console.WriteLine("\nPress the Enter key to exit the application...\n");
             Console.WriteLine("The application started at {0:HH:mm:ss.fff}", DateTime.Now);
             Console.ReadLine();
@@ -131,7 +188,7 @@ namespace ChallengeConsole
             Console.WriteLine("Terminating the application...");
         }
 
-        private static async Task ReadData(string shimKey, string endpoint, string userName, string startDate, string endDate) {
+        public static async Task ReadData(string shimKey, string userName, string endpoint, string startDate, string endDate) {
 
             Console.WriteLine("Read data...");
 
@@ -204,11 +261,7 @@ namespace ChallengeConsole
 
          private static void CaloriesBurnedAgregation(string userName, string shimKey, string endpoint, ArrayList arlistCaloriesBurned){
             
-            double sum = 0;
-            foreach (string caloriesBurnedValue in arlistCaloriesBurned)
-            {
-                sum = sum + Double.Parse(caloriesBurnedValue);
-            }
+            double sum = AddDouble(arlistCaloriesBurned);
             Console.WriteLine("CALORIES_BURNED : {0}", sum.ToString());
             SaveData(userName, shimKey, endpoint, sum.ToString());
          }
@@ -221,33 +274,38 @@ namespace ChallengeConsole
         }
 
         private static void SpeedAgregation(string userName, string shimKey, string endpoint, ArrayList arlistSpeeds) {
-
-            if(arlistBodyWeights.Count > 0) {
-                double sum = 0;
-                double avg = 0;
-                foreach (string speedValue in arlistSpeeds)
-                {
-                    sum = sum + Double.Parse(speedValue);
-                }
-                avg = sum/arlistBodyWeights.Count;
-
-                Console.WriteLine("SPEED : {0}", avg.ToString());
-                SaveData(userName, shimKey, endpoint, avg.ToString());
-            }
+            double max = MaxValue(arlistSpeeds);
+            Console.WriteLine("SPEED : {0}", max.ToString());
+            SaveData(userName, shimKey, endpoint, max.ToString());
         }
 
-        private static void StepCountAgregation(string userName, string shimKey, string endpoint, ArrayList arlistSteps) {
+        public static void StepCountAgregation(string userName, string shimKey, string endpoint, ArrayList arlistSteps) {
             
-            int sum = 0;
-            foreach (string stepCountValue in arlistSteps)
-            {
-                sum = sum + Int32.Parse(stepCountValue);
-            }
+            int sum = Add(arlistSteps);
             Console.WriteLine("STEP_COUNT : {0}", sum.ToString());
             SaveData(userName, shimKey, endpoint, sum.ToString());
         }
 
-        public int Add(ArrayList arlist) {
+        
+        public static double MaxValue(ArrayList arlist) {
+            
+            double max = 0.0;
+            if(arlist.Count > 0) {
+
+                max = double.MinValue;
+                foreach (string item in arlist)
+                {
+                    if (Double.Parse(item) > max)
+                    {
+                        max =Double.Parse(item);
+                    }
+                 }
+            }
+            return max;
+        }
+
+        public static int Add(ArrayList arlist) {
+           
             int sum = 0;
             foreach (string item in arlist)
             {
@@ -256,16 +314,35 @@ namespace ChallengeConsole
             return sum;
         }
 
+        public static double AddDouble(ArrayList arlist) {
+           
+            double sum = 0;
+            foreach (string item in arlist)
+            {
+                sum = sum + Convert.ToDouble(item);
+            }
+            return sum;
+        }
+
+        public static bool IsArrayListEmpty(ArrayList arlist) {
+            
+            if(arlist.Count > 0) {
+                return false;
+            } 
+
+            return true;
+        }
+
         private static void BodyMaxIndexAgregation(string userName, string shimKey, string endpoint, ArrayList arlistBodyMassIndexes) {
 
-            if(arlistBodyMassIndexes.Count > 0) {
-                string bodyMassIndex = arlistBodyWeights[arlistBodyMassIndexes.Count-1].ToString();
+            if(!IsArrayListEmpty(arlistBodyMassIndexes)) {
+                string bodyMassIndex = arlistBodyMassIndexes[arlistBodyMassIndexes.Count-1].ToString();
                 Console.WriteLine("BODY_MASS_INDEX : {0}", bodyMassIndex);
                 SaveData(userName, shimKey, endpoint, bodyMassIndex);
             }
         }
  
-        private static void SetupStoreage() {   
+        public static void SetupStoreage() {   
             
             var client = HazelcastClient.NewHazelcastClient();
             mapMetricsAggregatedData = client.GetMap<string, double>("metrics-aggregated-data");
@@ -287,10 +364,10 @@ namespace ChallengeConsole
                 value =  mapMetricsAggregatedData.Get(key);
                 string temp = "Metric: " + "Key: " +  key + " Value: " + value;
                 Console.WriteLine(temp);
-            }
+            } 
         }
 
-        private static void DeleteStoreageContent() 
+        public static void DeleteStoreageContent() 
         {
             mapMetricsAggregatedData.Clear();
         }

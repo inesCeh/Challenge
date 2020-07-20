@@ -107,3 +107,6 @@ D:\Challenge\Challenge\ChallengeConsoleNUnit\ChallengeConsole.Tests\obj\Debug\ne
 D:\Challenge\Challenge\ChallengeConsoleNUnit\ChallengeConsole.Tests\obj\Debug\netcoreapp3.1\ChallengeConsole.Tests.dll
 D:\Challenge\Challenge\ChallengeConsoleNUnit\ChallengeConsole.Tests\obj\Debug\netcoreapp3.1\ChallengeConsole.Tests.pdb
 D:\Challenge\Challenge\ChallengeConsoleNUnit\ChallengeConsole.Tests\obj\Debug\netcoreapp3.1\ChallengeConsole.Tests.genruntimeconfig.cache
+D:\Challenge\Challenge\ChallengeConsoleNUnit\ChallengeConsole.Tests\bin\Debug\netcoreapp3.1\Castle.Core.dll
+D:\Challenge\Challenge\ChallengeConsoleNUnit\ChallengeConsole.Tests\bin\Debug\netcoreapp3.1\FakeHttpMessageHandler.dll
+D:\Challenge\Challenge\ChallengeConsoleNUnit\ChallengeConsole.Tests\bin\Debug\netcoreapp3.1\Moq.dll
