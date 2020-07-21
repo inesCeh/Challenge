@@ -28,35 +28,11 @@ namespace ChallengeApi.Controllers
             _context = context;
         }
 
-        /*
-        // GET: api/MetricItems
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<MetricItem>>> GetMetricItems()
-        {  
-            ClearContext();
-    
-            var client = HazelcastClient.NewHazelcastClient();
-            IMap<string, double> mapMetricsAggregatedData = client.GetMap<string,double>("metrics-aggregated-data");
-            ICollection<string> keys = mapMetricsAggregatedData.KeySet();
-            MetricItem metricItem;
-            foreach (var key in keys) {
-         
-                metricItem = new MetricItem();
-                metricItem.Id = key;
-                metricItem.Value = mapMetricsAggregatedData.Get(key);;
-
-                _context.MetricItems.Add(metricItem);
-                await _context.SaveChangesAsync();
-            }
-
-            return await _context.MetricItems.ToListAsync();
-        }
-        */
-
-        // GET: api/MetricItems/userName
+        // GET: api/MetricItems/apiuser@example.com
         [HttpGet("{userName}")]
         public async Task<ActionResult<IEnumerable<MetricItem>>> GetMetricItems(string userName)
-        {            
+        {   
+            // We should clear context each time         
             ClearContext();
     
             var client = HazelcastClient.NewHazelcastClient();
@@ -79,7 +55,7 @@ namespace ChallengeApi.Controllers
             return await _context.MetricItems.ToListAsync();
         }
 
-        // GET: api/MetricItems/userName
+        // GET: api/MetricItems/apiuser@example.com/googlefit
         [HttpGet("{userName}/{shimKey}")]
         public async Task<ActionResult<IEnumerable<MetricItem>>> GetMetricItems(string userName, string shimKey)
         {            
@@ -105,7 +81,7 @@ namespace ChallengeApi.Controllers
             return await _context.MetricItems.ToListAsync();
         }
 
-        // GET: api/MetricItems/userName/shimKey/endpoint
+        // GET: api/MetricItems/apiuser@example.com/googlefit/body_weight
         [HttpGet("{userName}/{shimKey}/{endpoint}")]
         public async Task<ActionResult<MetricItem>> GetMetricItem(string userName, string shimKey, string endpoint)
         {
@@ -130,6 +106,7 @@ namespace ChallengeApi.Controllers
             return metricItem; 
         }
 
+        // GET: api/MetricItems/GetByUserNameAndEndpoint/apiuser@example.com/googlefit/body_weight
         [Route("[action]/{userName}/{endpoint}")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MetricItem>>> GetByUserNameAndEndpoint(string userName, string endpoint)
@@ -156,8 +133,7 @@ namespace ChallengeApi.Controllers
             return await _context.MetricItems.ToListAsync();
         }
 
-        /*
-        // GET: api/MetricItems/5
+/*         // GET: api/MetricItems/5
         [HttpGet("{id}")]
         public async Task<ActionResult<MetricItem>> GetMetricItem(long id)
         {
@@ -169,7 +145,7 @@ namespace ChallengeApi.Controllers
             }
 
             return metricItem;
-        }*/
+        } */
 
         // PUT: api/MetricItems/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for

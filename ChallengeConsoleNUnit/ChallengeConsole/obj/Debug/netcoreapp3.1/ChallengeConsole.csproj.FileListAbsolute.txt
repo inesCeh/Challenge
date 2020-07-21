@@ -73,3 +73,4 @@ D:\Challenge\Challenge\ChallengeConsoleNUnit\ChallengeConsole\obj\Debug\netcorea
 D:\Challenge\Challenge\ChallengeConsoleNUnit\ChallengeConsole\obj\Debug\netcoreapp3.1\ChallengeConsole.dll
 D:\Challenge\Challenge\ChallengeConsoleNUnit\ChallengeConsole\obj\Debug\netcoreapp3.1\ChallengeConsole.pdb
 D:\Challenge\Challenge\ChallengeConsoleNUnit\ChallengeConsole\obj\Debug\netcoreapp3.1\ChallengeConsole.genruntimeconfig.cache
+D:\Challenge\Challenge\ChallengeConsoleNUnit\ChallengeConsole\bin\Debug\netcoreapp3.1\YourApi.XML

@@ -28,7 +28,7 @@ namespace ChallengeApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<MetricContext>(opt =>
-            opt.UseInMemoryDatabase("metrics"));
+            opt.UseInMemoryDatabase("metrics-aggregated-data"));
             services.AddControllers();
         }
 

@@ -2,6 +2,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <DocumentationFile>bin\YourApi.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.113.1" />

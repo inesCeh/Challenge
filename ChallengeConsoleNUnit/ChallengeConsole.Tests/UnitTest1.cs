@@ -1,32 +1,11 @@
 using NUnit.Framework;
 using System.Collections;
-using Moq;
-using System.Net.Http;
-using System.Net;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace ChallengeConsole.Tests
 {
      [TestFixture]
     public class Tests
     {
-        private Program _program;
-
-        [SetUp]
-        public void Setup()
-        {
-            _program = new Program();
-
-        }
-
-        /*
-        [Test]
-        public void Test1()
-        {
-            Assert.Pass();
-        }*/
-
         [Test]
         public void Add_EmptyArrayList_ReturnsSumOfNumbers()
         {
@@ -115,14 +94,6 @@ namespace ChallengeConsole.Tests
 
             Assert.IsTrue(result);
         }
-
-        [Test]
-        public void SetupStoreage_ReturnTrue()
-        {
-            Program.SetupStoreage();
-            Assert.IsNotNull(Program.mapMetricsAggregatedData);
-        }
-
         
         [Test]
         public void AddDouble_EmptyArrayList_ReturnsSumOfNumbers()
@@ -145,6 +116,53 @@ namespace ChallengeConsole.Tests
             double result = Program.AddDouble(arlist);
 
             Assert.AreEqual(result, 6.6, 0.1);
+        }
+
+        [Test]
+        public void MinValue_EmptyArrayList_ReturnMinNumber()
+        {
+            ArrayList arlist= new ArrayList();
+
+            double result = Program.MinValue(arlist);
+
+            Assert.AreEqual(result, 0);
+        }
+
+        [Test]
+        public void MinValue_NotEmptyArrayList_ReturnMinNumber()
+        {
+            ArrayList arlist= new ArrayList();
+            arlist.Add("6");
+            arlist.Add("3");
+            arlist.Add("8");
+
+            double result = Program.MinValue(arlist);
+
+            Assert.AreEqual(result, 3);
+        }
+        
+        [Test]
+        public void CreateDictionary_ReturnTrue()
+        {
+            Program.CreateDictionary();
+
+            Assert.IsNotNull(Program.dictionary);
+        }
+
+        [Test]
+        public void CreateDictionary_NotEmptyArrayList_ReturnTrue()
+        {
+            Program.CreateDictionary();
+
+            Assert.IsNotEmpty(Program.dictionary);
+        }
+
+        [Test]
+        public void SetTimer_ReturnTrue()
+        {
+            Program.SetTimer();
+            Assert.AreEqual(Program.aTimer.Interval, 30000);
+            //Assert.AreEqual(Program.aTimer.Interval, 3600000);
         }
     }
 }

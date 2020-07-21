@@ -1,0 +1,167 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ChallengeConsole</name>
+    </assembly>
+    <members>
+        <member name="M:ChallengeConsole.Program.IsValid(System.String)">
+            <summary>
+            Checks if email address is valid.
+            </summary>
+            <param name="emailaddress"></param>
+            <returns>True, if email address is valid and false otherwise</returns>
+        </member>
+        <member name="M:ChallengeConsole.Program.CreateDictionary">
+            <summary>
+            Create dictionary with shimKeys in userNames
+            </summary>
+        </member>
+        <member name="M:ChallengeConsole.Program.OnTimedEvent(System.Object,System.Timers.ElapsedEventArgs)">
+            <summary>
+            
+            </summary>
+            <param name="source"></param>
+            <param name="e"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ChallengeConsole.Program.InitiateAuthorization">
+            <summary>
+            Perform authorization for all APIs
+            </summary>
+            <returns>Returns no value.</returns>
+        </member>
+        <member name="M:ChallengeConsole.Program.ReadData(System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Read the data for API metric
+            </summary>
+            <param name="shimKey">Key of the shim.</param>
+            <param name="userName">Username.</param>
+            <param name="endpoint">Endpoint (kind of metric).</param>
+            <param name="startDate">Start date.</param>
+            <param name="endDate">End date.</param>
+            <returns>Returns no value.</returns>
+        </member>
+        <member name="M:ChallengeConsole.Program.MaxValue(System.Collections.ArrayList)">
+            <summary>
+            Find max value and return result.
+            </summary>
+            <param name="arlist">Array List of strings.</param>
+            <returns>Max value.</returns>
+        </member>
+        <member name="M:ChallengeConsole.Program.MinValue(System.Collections.ArrayList)">
+            <summary>
+            Find min value and return result.
+            </summary>
+            <param name="arlist">Array List of strings.</param>
+            <returns>Min value.</returns>
+        </member>
+        <member name="M:ChallengeConsole.Program.Add(System.Collections.ArrayList)">
+            <summary>
+            Sum all values in Array List and return result.
+            </summary>
+            <param name="arlist">Array List of ints.</param>
+            <returns>Sum of elements in Array List.</returns>
+        </member>
+        <member name="M:ChallengeConsole.Program.AddDouble(System.Collections.ArrayList)">
+            <summary>
+            Sum all values in Array List and return result.
+            </summary>
+            <param name="arlist">Array List of doubles.</param>
+            <returns>Sum of elements in Array List.</returns>
+        </member>
+        <member name="M:ChallengeConsole.Program.IsArrayListEmpty(System.Collections.ArrayList)">
+            <summary>
+            Checks if ArrayList is empty.
+            </summary>
+            <param name="arlist">Array List</param>
+            <returns>False, if Array List is not empty and true otherwise</returns>
+        </member>
+        <member name="M:ChallengeConsole.Program.BodyWeightAgregation(System.String,System.String,System.String,System.Collections.ArrayList)">
+            <summary>
+            Save last added weight.
+            </summary>
+            <param name="userName">Username.</param>
+            <param name="shimKey">Key of the shim.</param>
+            <param name="endpoint">Endpoint (kind of metric).</param>
+            <param name="arlistBodyWeights">Array of body weights.</param>
+        </member>
+        <member name="M:ChallengeConsole.Program.CaloriesBurnedAgregation(System.String,System.String,System.String,System.Collections.ArrayList)">
+            <summary>
+            Save sum of all burned calories.
+            </summary>
+            <param name="userName">Username.</param>
+            <param name="shimKey">Key of the shim.</param>
+            <param name="endpoint">Endpoint (kind of metric).</param>
+            <param name="arlistCaloriesBurned">Array of burned calories.</param>
+        </member>
+        <member name="M:ChallengeConsole.Program.HeartRateAgregation(System.String,System.String,System.String,System.Collections.ArrayList)">
+            <summary>
+            Save min heart rate.
+            </summary>
+            <param name="userName">Username.</param>
+            <param name="shimKey">Key of the shim.</param>
+            <param name="endpoint">Endpoint (kind of metric).</param>
+            <param name="arlistHeartRates">Array of heart rates.</param>
+        </member>
+        <member name="M:ChallengeConsole.Program.PhysicalActivityAgregation(System.String,System.String,System.String,System.Collections.ArrayList)">
+            <summary>
+            Save count of all physical activities.
+            </summary>
+            <param name="userName">Username.</param>
+            <param name="shimKey">Key of the shim.</param>
+            <param name="endpoint">Endpoint (kind of metric).</param>
+            <param name="physical_activity">Array of physical activities.</param>
+        </member>
+        <member name="M:ChallengeConsole.Program.SpeedAgregation(System.String,System.String,System.String,System.Collections.ArrayList)">
+            <summary>
+            Save max speed.
+            </summary>
+            <param name="userName">Username.</param>
+            <param name="shimKey">Key of the shim.</param>
+            <param name="endpoint">Endpoint (kind of metric).</param>
+            <param name="arlistSpeeds">Array of speeds.</param>
+        </member>
+        <member name="M:ChallengeConsole.Program.StepCountAgregation(System.String,System.String,System.String,System.Collections.ArrayList)">
+            <summary>
+            Save sum of all step counts.
+            </summary>
+            <param name="userName">Username.</param>
+            <param name="shimKey">Key of the shim.</param>
+            <param name="endpoint">Endpoint (kind of metric).</param>
+            <param name="arlistSteps">Array of step counts.</param>
+        </member>
+        <member name="M:ChallengeConsole.Program.BodyMaxIndexAgregation(System.String,System.String,System.String,System.Collections.ArrayList)">
+            <summary>
+            Save last added body mass index.
+            </summary>
+            <param name="userName">Username.</param>
+            <param name="shimKey">Key of the shim.</param>
+            <param name="endpoint">Endpoint (kind of metric).</param>
+            <param name="arlistBodyMassIndexes"></param>
+        </member>
+        <member name="M:ChallengeConsole.Program.SetupStoreage">
+            <summary>
+            Start the Hazelcast Client, connect to an already running Hazelcast Cluster and get the Distributed Map from Cluster
+            </summary>
+        </member>
+        <member name="M:ChallengeConsole.Program.SaveData(System.String,System.String,System.String,System.String)">
+            <summary>
+            Store aggregated data in Hazelcast storage 
+            </summary>
+            <param name="userName">Username.</param>
+            <param name="shimKey">Key of the shim.</param>
+            <param name="endpoint">Endpoint (kind of metric).</param>
+            <param name="value">Metric value.</param>
+        </member>
+        <member name="M:ChallengeConsole.Program.ReadFromStoreage">
+            <summary>
+            Read all content form Hazelcast storeage
+            </summary>
+        </member>
+        <member name="M:ChallengeConsole.Program.DeleteStoreageContent">
+            <summary>
+            Delete all content form Hazelcast storeage
+            </summary>
+        </member>
+    </members>
+</doc>
