@@ -164,5 +164,27 @@ namespace ChallengeConsole.Tests
             Assert.AreEqual(Program.aTimer.Interval, 30000);
             //Assert.AreEqual(Program.aTimer.Interval, 3600000);
         }
+
+        [Test]
+        public void GetStartDate_ReturnTrue()
+        {
+            string startDate = Program.GetStartDate();
+            Assert.IsNotNull(startDate);
+        }
+
+        [Test]
+        public void GetEndDate_ReturnTrue()
+        {
+            string endDate = Program.GetEndDate();
+            Assert.IsNotNull(endDate);
+        }
+        
+        [Test]
+        public void CompareStartAndEndDate_ReturnTrue()
+        {
+            string startDate = Program.GetStartDate();
+            string endDate = Program.GetEndDate();
+            Assert.AreNotEqual(startDate, endDate);
+        }
     }
 }

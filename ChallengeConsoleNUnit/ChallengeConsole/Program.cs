@@ -12,24 +12,46 @@ using System.Diagnostics;
 
 namespace ChallengeConsole
 {
+    /// <remarks>
+    /// Starts the console application.
+    /// </remarks>
     public class Program
     {  
+        /// <summary>
+        /// Dictionary with shimKey-userName pairs
+        /// </summary>
         public static Dictionary<string, string> dictionary;
+        /// <summary>
+        /// Timer
+        /// </summary>
         public static System.Timers.Timer aTimer;
+        /// <summary>
+        /// IMap with metric-aggregatedValue pairs
+        /// </summary>
         public static IMap<string, double> mapMetricsAggregatedData;
         private static ArrayList arlistCaloriesBurned;
-        public static ArrayList arlistBodyWeights;
+        private static ArrayList arlistBodyWeights;
         private static ArrayList arlistSpeeds;
         private static ArrayList arlistHeartRates;
         private static ArrayList arlistPhysicalActivity;
         private static ArrayList arlistSteps;
         private static ArrayList arlistBodyMassIndexes;
+        
+        /// <summary>
+        /// Creates dictionary with shimKeys in userNames.
+        /// </summary>
+        public static void CreateDictionary() {
+            
+            dictionary = new Dictionary<string, string>();
+            dictionary.Add("googlefit", "");
+            dictionary.Add("fitbit", "");
+        }
 
         /// <summary>
         /// Checks if email address is valid.
         /// </summary>
-        /// <param name="emailaddress"></param>
-        /// <returns>True, if email address is valid and false otherwise</returns>
+        /// <param name="emailaddress">Email address</param>
+        /// <returns>True, if email address is valid and false otherwise.</returns>
         public static bool IsValid(string emailAddress)
         {
             try {
@@ -38,16 +60,6 @@ namespace ChallengeConsole
             } catch {
                 return false;
             }
-        }
-        
-        /// <summary>
-        /// Create dictionary with shimKeys in userNames
-        /// </summary>
-        public static void CreateDictionary() {
-            
-            dictionary = new Dictionary<string, string>();
-            dictionary.Add("googlefit", "");
-            dictionary.Add("fitbit", "");
         }
 
         static async Task Main(string[] args)
@@ -84,6 +96,93 @@ namespace ChallengeConsole
             await InitiateAuthorization(); 
         }
 
+        /// <summary>
+        /// Creates start date.
+        /// </summary>
+        /// <returns>Star date in yyyy/MM/dd format.</returns>
+        public static string GetStartDate() {
+            DateTime dateTimeToday = DateTime.Today;
+            DateTime dataTimeStart = dateTimeToday.AddDays(-10);
+            string startDay = dataTimeStart.ToString("yyyy/MM/dd"); 
+            return startDay.Replace('/', '-');
+        }
+
+        /// <summary>
+        /// Creates end date.
+        /// </summary>
+        /// <returns>End date in yyyy/MM/dd format.</returns>
+        public static string GetEndDate() {
+            DateTime dateTime = DateTime.Today;
+            string endDay = dateTime.ToString("yyyy/MM/dd"); 
+            return endDay.Replace('/', '-');
+        }
+
+        /// <summary>
+        /// Calls methods to read and save data.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="e"></param>
+        /// <returns>Returns no value.</returns>
+        private static async void OnTimedEvent(Object source, ElapsedEventArgs e)
+        {
+            Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
+                          e.SignalTime);
+
+            //DeleteStoreageContent(); 
+
+            string endDate = GetEndDate();
+            string startDate = GetStartDate();
+
+            // Get user name for Google Fit
+            string userNameGooglefit = dictionary["googlefit"];
+
+            await ReadData("googlefit", userNameGooglefit, "body_height", startDate, endDate);
+
+            arlistBodyWeights = new ArrayList();
+            await ReadData("googlefit", userNameGooglefit, "body_weight", startDate, endDate);
+            BodyWeightAgregation(userNameGooglefit, "googlefit", "body_weight", arlistBodyWeights);
+
+            arlistCaloriesBurned = new ArrayList();
+            await ReadData("googlefit", userNameGooglefit, "calories_burned", startDate, endDate);
+            CaloriesBurnedAgregation(userNameGooglefit, "googlefit", "calories_burned", arlistCaloriesBurned);
+
+            arlistHeartRates = new ArrayList();
+            await ReadData("googlefit", userNameGooglefit, "heart_rate", startDate, endDate);
+            HeartRateAgregation(userNameGooglefit, "googlefit", "heart_rate", arlistHeartRates);
+
+            arlistPhysicalActivity = new ArrayList();
+            await ReadData("googlefit", userNameGooglefit, "physical_activity", startDate, endDate);
+            PhysicalActivityAgregation(userNameGooglefit, "googlefit", "physical_activity", arlistPhysicalActivity);
+
+            arlistSpeeds = new ArrayList();
+            await ReadData("googlefit", userNameGooglefit, "speed", startDate, endDate);
+            SpeedAgregation(userNameGooglefit, "googlefit", "speed", arlistSpeeds);
+
+            arlistSteps = new ArrayList();
+            await ReadData("googlefit", userNameGooglefit, "step_count", startDate, endDate);
+            StepCountAgregation(userNameGooglefit, "googlefit", "step_count", arlistSteps);
+
+            // Get user name for Fitbit
+            string userNameFitbit = dictionary["fitbit"];
+
+            arlistBodyMassIndexes = new ArrayList();
+            await ReadData("fitbit", userNameFitbit, "body_mass_index", startDate, endDate);
+            BodyMaxIndexAgregation(userNameFitbit, "fitbit", "body_mass_index", arlistBodyMassIndexes);
+
+            arlistBodyWeights = new ArrayList();
+            await ReadData("fitbit", userNameFitbit, "body_weight", startDate, endDate);
+            BodyWeightAgregation(userNameFitbit, "fitbit", "body_weight", arlistBodyWeights);
+
+            arlistPhysicalActivity = new ArrayList();
+            await ReadData("fitbit", userNameFitbit, "physical_activity", startDate, endDate);
+            PhysicalActivityAgregation(userNameFitbit, "fitbit", "physical_activity", arlistPhysicalActivity);
+
+            ReadFromStoreage();
+        }
+
+        /// <summary>
+        /// Creates Timer object and sets parameters. 
+        /// </summary>
         public static void SetTimer()
         {
             // 30 seconds
@@ -96,67 +195,7 @@ namespace ChallengeConsole
         }
 
         /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="e"></param>
-        /// <returns></returns>
-        private static async void OnTimedEvent(Object source, ElapsedEventArgs e)
-        {
-            Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
-                          e.SignalTime);
-
-            DeleteStoreageContent(); 
-
-            // Get user name for Google Fit
-            string userNameGooglefit = dictionary["googlefit"];
-
-            await ReadData("googlefit", userNameGooglefit, "body_height", "2020-07-12", "2020-07-13");
-
-            arlistBodyWeights = new ArrayList();
-            await ReadData("googlefit", userNameGooglefit, "body_weight", "2020-07-12", "2020-07-13");
-            BodyWeightAgregation(userNameGooglefit, "googlefit", "body_weight", arlistBodyWeights);
-
-            arlistCaloriesBurned = new ArrayList();
-            await ReadData("googlefit", userNameGooglefit, "calories_burned", "2020-07-12", "2020-07-13");
-            CaloriesBurnedAgregation(userNameGooglefit, "googlefit", "calories_burned", arlistCaloriesBurned);
-
-            arlistHeartRates = new ArrayList();
-            await ReadData("googlefit", userNameGooglefit, "heart_rate", "2020-07-12", "2020-07-13");
-            HeartRateAgregation(userNameGooglefit, "googlefit", "heart_rate", arlistHeartRates);
-
-            arlistPhysicalActivity = new ArrayList();
-            await ReadData("googlefit", userNameGooglefit, "physical_activity", "2020-07-14", "2020-07-14");
-            PhysicalActivityAgregation(userNameGooglefit, "googlefit", "physical_activity", arlistPhysicalActivity);
-
-            arlistSpeeds = new ArrayList();
-            await ReadData("googlefit", userNameGooglefit, "speed", "2020-07-12", "2020-07-13");
-            SpeedAgregation(userNameGooglefit, "googlefit", "speed", arlistSpeeds);
-
-            arlistSteps = new ArrayList();
-            await ReadData("googlefit", userNameGooglefit, "step_count", "2020-07-12", "2020-07-13");
-            StepCountAgregation(userNameGooglefit, "googlefit", "step_count", arlistSteps);
-
-            // Get user name for Fitbit
-            string userNameFitbit = dictionary["fitbit"];
-
-            arlistBodyMassIndexes = new ArrayList();
-            await ReadData("fitbit", userNameFitbit, "body_mass_index", "2020-07-12", "2020-07-13");
-            BodyMaxIndexAgregation(userNameFitbit, "fitbit", "body_mass_index", arlistBodyMassIndexes);
-
-            arlistBodyWeights = new ArrayList();
-            await ReadData("fitbit", userNameFitbit, "body_weight", "2020-07-12", "2020-07-13");
-            BodyWeightAgregation(userNameFitbit, "fitbit", "body_weight", arlistBodyWeights);
-
-            arlistPhysicalActivity = new ArrayList();
-            await ReadData("fitbit", userNameFitbit, "physical_activity", "2020-07-12", "2020-07-13");
-            PhysicalActivityAgregation(userNameFitbit, "fitbit", "physical_activity", arlistPhysicalActivity);
-
-            ReadFromStoreage();
-        }
-
-        /// <summary>
-        /// Perform authorization for all APIs
+        /// Performs authorization for all APIs.
         /// </summary>
         /// <returns>Returns no value.</returns>
         public static async Task InitiateAuthorization() {
@@ -227,7 +266,7 @@ namespace ChallengeConsole
         }
 
         /// <summary>
-        /// Read the data for API metric
+        /// Reads the data for API metric.
         /// </summary>
         /// <param name="shimKey">Key of the shim.</param>
         /// <param name="userName">Username.</param>
@@ -241,6 +280,7 @@ namespace ChallengeConsole
 
             // Create request to pull data from a third-party API
             string baseURL = $"http://localhost:8083/data/{shimKey}/{endpoint}?username={userName}&dateStart={startDate}&&dtaEnd={endDate}&normalize=true";
+            Console.WriteLine(baseURL);
             try { 
                 using (HttpClient client = new HttpClient())
                 {
@@ -257,30 +297,32 @@ namespace ChallengeConsole
                                 Console.WriteLine("Endpoint : {0}", endpoint);
                                 string body = $"{dataObj["body"]}";
 
-                                // List of Body elements 
-                                JArray jsonArray = JArray.Parse(body) as JArray;
-                                dynamic bodies = jsonArray;
-                                foreach (var item in bodies)
-                                {
-                                    if (string.Equals(endpoint, "body_height")) {
-                                        Console.WriteLine("BODY_HEIGHT : {0}", item.body.body_height.value.ToString());
-                                        SaveData(userName, shimKey, endpoint, item.body.body_height.value.ToString());
-                                    } else if(string.Equals(endpoint, "body_weight")) {
-                                        arlistBodyWeights.Add(item.body.body_weight.value.ToString());
-                                    } else if (string.Equals(endpoint, "calories_burned")) {
-                                        arlistCaloriesBurned.Add(item.body.kcal_burned.value.ToString());
-                                    } else if (string.Equals(endpoint, "heart_rate")) {
-                                        arlistHeartRates.Add(item.body.heart_rate.value.ToString());    
-                                    } else if (string.Equals(endpoint, "step_count")) {
-                                        arlistSteps.Add(item.body.step_count.ToString()); 
-                                    } else if (string.Equals(endpoint, "speed")) {
-                                       arlistSpeeds.Add(item.body.speed.value.ToString());
-                                    } else if (string.Equals(endpoint, "body_mass_index")) {
-                                        arlistBodyMassIndexes.Add(item.body.body_mass_index.value.ToString());
-                                    } else if (string.Equals(endpoint, "physical_activity")) {
-                                        arlistPhysicalActivity.Add(item.body.activity_name.ToString());
-                                    } else {
-                                        Console.WriteLine("OTHER");
+                                if(!string.IsNullOrEmpty(body)){
+                                    // List of Body elements 
+                                    JArray jsonArray = JArray.Parse(body) as JArray;
+                                    dynamic bodies = jsonArray;
+                                    foreach (var item in bodies)
+                                    {
+                                        if (string.Equals(endpoint, "body_height")) {
+                                            Console.WriteLine("BODY_HEIGHT : {0}", item.body.body_height.value.ToString());
+                                            SaveData(userName, shimKey, endpoint, item.body.body_height.value.ToString());
+                                        } else if(string.Equals(endpoint, "body_weight")) {
+                                            arlistBodyWeights.Add(item.body.body_weight.value.ToString());
+                                        } else if (string.Equals(endpoint, "calories_burned")) {
+                                            arlistCaloriesBurned.Add(item.body.kcal_burned.value.ToString());
+                                        } else if (string.Equals(endpoint, "heart_rate")) {
+                                            arlistHeartRates.Add(item.body.heart_rate.value.ToString());    
+                                        } else if (string.Equals(endpoint, "step_count")) {
+                                            arlistSteps.Add(item.body.step_count.ToString()); 
+                                        } else if (string.Equals(endpoint, "speed")) {
+                                        arlistSpeeds.Add(item.body.speed.value.ToString());
+                                        } else if (string.Equals(endpoint, "body_mass_index")) {
+                                            arlistBodyMassIndexes.Add(item.body.body_mass_index.value.ToString());
+                                        } else if (string.Equals(endpoint, "physical_activity")) {
+                                            arlistPhysicalActivity.Add(item.body.activity_name.ToString());
+                                        } else {
+                                            Console.WriteLine("OTHER");
+                                         }
                                     }
                                 }
                             }
@@ -298,9 +340,9 @@ namespace ChallengeConsole
         }
 
         /// <summary>
-        /// Find max value and return result.
+        /// Finds max value and returns result.
         /// </summary>
-        /// <param name="arlist">Array List of strings.</param>
+        /// <param name="arlist">List of strings</param>
         /// <returns>Max value.</returns>
         public static double MaxValue(ArrayList arlist) {
             
@@ -320,9 +362,9 @@ namespace ChallengeConsole
         }
 
         /// <summary>
-        /// Find min value and return result.
+        /// Finds min value and returns result.
         /// </summary>
-        /// <param name="arlist">Array List of strings.</param>
+        /// <param name="arlist">List of strings</param>
         /// <returns>Min value.</returns>
         public static int MinValue(ArrayList arlist) {
             
@@ -342,9 +384,9 @@ namespace ChallengeConsole
         }
 
         /// <summary>
-        /// Sum all values in Array List and return result.
+        /// Sums all values in Array List and returns result.
         /// </summary>
-        /// <param name="arlist">Array List of ints.</param>
+        /// <param name="arlist">List of ints.</param>
         /// <returns>Sum of elements in Array List.</returns>
         public static int Add(ArrayList arlist) {
            
@@ -357,9 +399,9 @@ namespace ChallengeConsole
         }
 
         /// <summary>
-        /// Sum all values in Array List and return result.
+        /// Sums all values in Array List and returns result.
         /// </summary>
-        /// <param name="arlist">Array List of doubles.</param>
+        /// <param name="arlist">List of doubles</param>
         /// <returns>Sum of elements in Array List.</returns>
         public static double AddDouble(ArrayList arlist) {
            
@@ -374,8 +416,8 @@ namespace ChallengeConsole
         /// <summary>
         /// Checks if ArrayList is empty.
         /// </summary>
-        /// <param name="arlist">Array List</param>
-        /// <returns>False, if Array List is not empty and true otherwise</returns>
+        /// <param name="arlist">List</param>
+        /// <returns>False, if Array List is not empty and true otherwise.</returns>
         public static bool IsArrayListEmpty(ArrayList arlist) {
             
             if(arlist.Count > 0) {
@@ -386,15 +428,15 @@ namespace ChallengeConsole
         }
 
         /// <summary>
-        /// Save last added weight.
+        /// Saves last added weight.
         /// </summary>
-        /// <param name="userName">Username.</param>
-        /// <param name="shimKey">Key of the shim.</param>
-        /// <param name="endpoint">Endpoint (kind of metric).</param>
-        /// <param name="arlistBodyWeights">Array of body weights.</param>
-        private static void BodyWeightAgregation(string userName, string shimKey, string endpoint, ArrayList arlistBodyWeights) {
+        /// <param name="userName">Username</param>
+        /// <param name="shimKey">Key of the shim</param>
+        /// <param name="endpoint">Endpoint (kind of metric)</param>
+        /// <param name="arlistBodyWeights">List of body weights</param>
+        public static void BodyWeightAgregation(string userName, string shimKey, string endpoint, ArrayList arlistBodyWeights) {
             
-            string weight = "";
+            string weight = "0.0";
             if(!IsArrayListEmpty(arlistBodyWeights)) {
                 weight = arlistBodyWeights[arlistBodyWeights.Count-1].ToString();
             }
@@ -403,13 +445,13 @@ namespace ChallengeConsole
         }
 
         /// <summary>
-        /// Save sum of all burned calories.
+        /// Saves sum of all burned calories.
         /// </summary>
-        /// <param name="userName">Username.</param>
-        /// <param name="shimKey">Key of the shim.</param>
-        /// <param name="endpoint">Endpoint (kind of metric).</param>
-        /// <param name="arlistCaloriesBurned">Array of burned calories.</param>
-         private static void CaloriesBurnedAgregation(string userName, string shimKey, string endpoint, ArrayList arlistCaloriesBurned){
+        /// <param name="userName">Username</param>
+        /// <param name="shimKey">Key of the shim</param>
+        /// <param name="endpoint">Endpoint (kind of metric)</param>
+        /// <param name="arlistCaloriesBurned">List of burned calories</param>
+         public static void CaloriesBurnedAgregation(string userName, string shimKey, string endpoint, ArrayList arlistCaloriesBurned){
             
             double sum = 0.0;
             if(!IsArrayListEmpty(arlistCaloriesBurned)) {
@@ -420,13 +462,13 @@ namespace ChallengeConsole
          }
 
         /// <summary>
-        /// Save min heart rate.
+        /// Saves min heart rate.
         /// </summary>
-        /// <param name="userName">Username.</param>
-        /// <param name="shimKey">Key of the shim.</param>
-        /// <param name="endpoint">Endpoint (kind of metric).</param>
-        /// <param name="arlistHeartRates">Array of heart rates.</param>
-        private static void HeartRateAgregation(string userName, string shimKey, string endpoint, ArrayList arlistHeartRates) {
+        /// <param name="userName">Username</param>
+        /// <param name="shimKey">Key of the shim</param>
+        /// <param name="endpoint">Endpoint (kind of metric)</param>
+        /// <param name="arlistHeartRates">List of heart rates.</param>
+        public static void HeartRateAgregation(string userName, string shimKey, string endpoint, ArrayList arlistHeartRates) {
             
             int min = 0;
             if(!IsArrayListEmpty(arlistHeartRates)) {
@@ -437,15 +479,15 @@ namespace ChallengeConsole
         }
 
         /// <summary>
-        /// Save count of all physical activities.
+        /// Saves count of all physical activities.
         /// </summary>
-        /// <param name="userName">Username.</param>
-        /// <param name="shimKey">Key of the shim.</param>
-        /// <param name="endpoint">Endpoint (kind of metric).</param>
-        /// <param name="physical_activity">Array of physical activities.</param>
-        private static void PhysicalActivityAgregation(string userName, string shimKey, string endpoint, ArrayList physical_activity)
+        /// <param name="userName">Username</param>
+        /// <param name="shimKey">Key of the shim</param>
+        /// <param name="endpoint">Endpoint (kind of metric)</param>
+        /// <param name="physical_activity">List of physical activities.</param>
+        public static void PhysicalActivityAgregation(string userName, string shimKey, string endpoint, ArrayList physical_activity)
         {
-            double sum = 0.0;
+            int sum = 0;
             if(!IsArrayListEmpty(physical_activity)) {
                 sum = physical_activity.Count;
             }
@@ -454,13 +496,13 @@ namespace ChallengeConsole
         }
 
         /// <summary>
-        /// Save max speed.
+        /// Saves max speed.
         /// </summary>
-        /// <param name="userName">Username.</param>
-        /// <param name="shimKey">Key of the shim.</param>
-        /// <param name="endpoint">Endpoint (kind of metric).</param>
-        /// <param name="arlistSpeeds">Array of speeds.</param>
-        private static void SpeedAgregation(string userName, string shimKey, string endpoint, ArrayList arlistSpeeds) {
+        /// <param name="userName">Username</param>
+        /// <param name="shimKey">Key of the shim</param>
+        /// <param name="endpoint">Endpoint (kind of metric)</param>
+        /// <param name="arlistSpeeds">List of speeds.</param>
+        public static void SpeedAgregation(string userName, string shimKey, string endpoint, ArrayList arlistSpeeds) {
             
             double max = 0.0;
             if(!IsArrayListEmpty(arlistSpeeds)) {
@@ -471,12 +513,12 @@ namespace ChallengeConsole
         }
 
         /// <summary>
-        /// Save sum of all step counts.
+        /// Saves sum of all step counts.
         /// </summary>
-        /// <param name="userName">Username.</param>
-        /// <param name="shimKey">Key of the shim.</param>
-        /// <param name="endpoint">Endpoint (kind of metric).</param>
-        /// <param name="arlistSteps">Array of step counts.</param>
+        /// <param name="userName">Username</param>
+        /// <param name="shimKey">Key of the shim</param>
+        /// <param name="endpoint">Endpoint (kind of metric)</param>
+        /// <param name="arlistSteps">List of step counts.</param>
         public static void StepCountAgregation(string userName, string shimKey, string endpoint, ArrayList arlistSteps) {
             
             int sum = 0;
@@ -488,15 +530,15 @@ namespace ChallengeConsole
         }
 
         /// <summary>
-        /// Save last added body mass index.
+        /// Saves last added body mass index.
         /// </summary>
-        /// <param name="userName">Username.</param>
-        /// <param name="shimKey">Key of the shim.</param>
-        /// <param name="endpoint">Endpoint (kind of metric).</param>
-        /// <param name="arlistBodyMassIndexes"></param>
-        private static void BodyMaxIndexAgregation(string userName, string shimKey, string endpoint, ArrayList arlistBodyMassIndexes) {
+        /// <param name="userName">Username</param>
+        /// <param name="shimKey">Key of the shim</param>
+        /// <param name="endpoint">Endpoint (kind of metric)</param>
+        /// <param name="arlistBodyMassIndexes">List od body mass indexes</param>
+        public static void BodyMaxIndexAgregation(string userName, string shimKey, string endpoint, ArrayList arlistBodyMassIndexes) {
 
-            string bodyMassIndex = "";
+            string bodyMassIndex = "0.0";
             if(!IsArrayListEmpty(arlistBodyMassIndexes)) {
                 bodyMassIndex = arlistBodyMassIndexes[arlistBodyMassIndexes.Count-1].ToString();
             }
@@ -505,18 +547,16 @@ namespace ChallengeConsole
         }
  
         /// <summary>
-        /// Start the Hazelcast Client, connect to an already running Hazelcast Cluster and get the Distributed Map from Cluster
+        /// Starts the Hazelcast Client on 127.0.0.1, connects to an already running Hazelcast Cluster and gets the Distributed Map from Cluster
         /// </summary>
         public static void SetupStoreage() {   
 
-            // Start the Hazelcast Client and connect to an already running Hazelcast Cluster on 127.0.0.1
             var client = HazelcastClient.NewHazelcastClient();
-            // Get the Distributed Map from Cluster.
             mapMetricsAggregatedData = client.GetMap<string, double>("metrics-aggregated-data");
         }
 
         /// <summary>
-        /// Store aggregated data in Hazelcast storage 
+        /// Stores aggregated data in Hazelcast storage 
         /// </summary>
         /// <param name="userName">Username.</param>
         /// <param name="shimKey">Key of the shim.</param>
@@ -532,7 +572,7 @@ namespace ChallengeConsole
         }
 
         /// <summary>
-        /// Read all content form Hazelcast storeage
+        /// Reads all content form Hazelcast storeage
         /// </summary>
         private static void ReadFromStoreage() 
         {

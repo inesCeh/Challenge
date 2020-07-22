@@ -2,17 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ChallengeApi.Models;
-
-using System.Timers;
-using System.Net.Http;
 using Hazelcast.Client;
-using Newtonsoft.Json.Linq;
 using Hazelcast.Core;
-using System.Collections;
+using Hazelcast.Config;
+
 
 namespace ChallengeApi.Controllers
 {
@@ -35,7 +31,14 @@ namespace ChallengeApi.Controllers
             // We should clear context each time         
             ClearContext();
     
-            var client = HazelcastClient.NewHazelcastClient();
+            string hazelcastIP = Environment.GetEnvironmentVariable("ENV_HIP");
+            if(string.IsNullOrEmpty(hazelcastIP)) {
+                hazelcastIP = "127.0.0.1";
+            }
+            var cfg = new ClientConfig();
+            cfg.GetNetworkConfig().AddAddress(hazelcastIP);
+            var client = HazelcastClient.NewHazelcastClient(cfg);
+           
             IMap<string, double> mapMetricsAggregatedData = client.GetMap<string,double>("metrics-aggregated-data");
             ICollection<string> keys = mapMetricsAggregatedData.KeySet();
             MetricItem metricItem;
@@ -61,7 +64,14 @@ namespace ChallengeApi.Controllers
         {            
             ClearContext();
     
-            var client = HazelcastClient.NewHazelcastClient();
+            string hazelcastIP = Environment.GetEnvironmentVariable("ENV_HIP");
+            if(string.IsNullOrEmpty(hazelcastIP)) {
+                hazelcastIP = "127.0.0.1";
+            }
+            var cfg = new ClientConfig();
+            cfg.GetNetworkConfig().AddAddress(hazelcastIP);
+            var client = HazelcastClient.NewHazelcastClient(cfg);
+
             IMap<string, double> mapMetricsAggregatedData = client.GetMap<string,double>("metrics-aggregated-data");
             ICollection<string> keys = mapMetricsAggregatedData.KeySet();
             MetricItem metricItem;
@@ -89,7 +99,14 @@ namespace ChallengeApi.Controllers
             await Task.Run(() => 
             {
                             
-            var client = HazelcastClient.NewHazelcastClient();
+            string hazelcastIP = Environment.GetEnvironmentVariable("ENV_HIP");
+            if(string.IsNullOrEmpty(hazelcastIP)) {
+                hazelcastIP = "127.0.0.1";
+            }
+            var cfg = new ClientConfig();
+            cfg.GetNetworkConfig().AddAddress(hazelcastIP);
+            var client = HazelcastClient.NewHazelcastClient(cfg);
+
             IMap<string, double> mapMetricsAggregatedData = client.GetMap<string,double>("metrics-aggregated-data");
             ICollection<string> keys = mapMetricsAggregatedData.KeySet();
             foreach (var key in keys) {
@@ -113,7 +130,14 @@ namespace ChallengeApi.Controllers
         {            
             ClearContext();
     
-            var client = HazelcastClient.NewHazelcastClient();
+            string hazelcastIP = Environment.GetEnvironmentVariable("ENV_HIP");
+            if(string.IsNullOrEmpty(hazelcastIP)) {
+                hazelcastIP = "127.0.0.1";
+            }
+            var cfg = new ClientConfig();
+            cfg.GetNetworkConfig().AddAddress(hazelcastIP);
+            var client = HazelcastClient.NewHazelcastClient(cfg);
+
             IMap<string, double> mapMetricsAggregatedData = client.GetMap<string,double>("metrics-aggregated-data");
             ICollection<string> keys = mapMetricsAggregatedData.KeySet();
             MetricItem metricItem;
